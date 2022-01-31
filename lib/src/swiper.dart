@@ -753,7 +753,7 @@ class _StackSwiper extends _SubSwiper {
 
   @override
   State<StatefulWidget> createState() {
-    return new _StackViewState();
+    return new _StackViewState(itemCount: itemCount);
   }
 }
 
@@ -853,7 +853,14 @@ class _TinderState extends _CustomLayoutStateBase<_TinderSwiper> {
 class _StackViewState extends _CustomLayoutStateBase<_StackSwiper> {
   List<double> scales;
   List<double> offsets;
-  List<double> opacity;
+  List<double> opacity = [];
+  int itemCount;
+  int conditionForIndex = 0;
+
+  _StackViewState({
+    this.itemCount,
+  });
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -865,7 +872,16 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSwiper> {
       offsets = [-space, -space / 3 * 2, -space / 3, 0.0, _swiperWidth];
     } else {
       double space = (_swiperHeight - widget.itemHeight) / 2;
-      offsets = [-space, -space / 3 * 2, -space / 3, 0.0, _swiperHeight];
+      // offsets = [-space, -space / 3 * 2, -space / 3, 0.0, _swiperHeight];
+      offsets = [
+        -space / 4.8 * 5,
+        -space / 4.8 * 4,
+        -space / 4.8 * 3,
+        -space / 4.8 * 2,
+        -space / 4.8,
+        0.0,
+        _swiperHeight
+      ];
     }
   }
 
@@ -879,13 +895,33 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSwiper> {
   void afterRender() {
     super.afterRender();
 
-    //length of the values array below
-    _animationCount = 5;
+    conditionForIndex = itemCount >= 6 ? 0 : 5 - itemCount;
 
-    //Array below this line, '0' index is 1.0 ,witch is the first item show in swiper.
-    _startIndex = -3;
-    scales = [0.7, 0.8, 0.9, 1.0, 1.0];
-    opacity = [0.0, 0.5, 1.0, 1.0, 1.0];
+    //length of the values array below
+    _animationCount = 6;
+
+    //Array below this line, '0' index is 1.0 ,witch is the first item show in swiper. -5
+    _startIndex = -6;
+
+    // scales = [0.7, 0.8, 0.9, 1.0, 1.0];
+    scales = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+
+    if (itemCount >= 5) {
+      opacity = [0.0, 0.5, 1.0, 1.0, 1.0, 1.0];
+    } else if (itemCount == 1) {
+      opacity = [0.0, 0.0, 0.0, 0.0, 0.0, 1.0];
+    } else {
+      for (int a = 0; a < _animationCount; a++) {
+        if (a < (itemCount-1))
+          opacity.add(1.0);
+        else if (a == (itemCount-1))
+          opacity.add(0.5);
+        else
+          opacity.add(0.0);
+      }
+      var helper = opacity;
+      opacity = helper.reversed.toList();
+    }
 
     _updateValues();
   }
